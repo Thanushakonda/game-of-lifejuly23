@@ -1,0 +1,37 @@
+pipeline { 
+    agent {label 'JAVA_8'} 
+    options { 
+        retry(3)
+        timeout(time: 30, unit: 'MINUTES') 
+    } 
+    triggers {
+        pollSCM('* * * * *') 
+
+    }  
+    tools {
+        jdk 'JAVA_8'
+    } 
+    stages {
+        stage('vcs') {
+            steps {
+                git url: 'https://github.com/Thanushakonda/game-of-lifejuly23.git',
+                branch: 'master'
+            } 
+         } 
+        stage('build and package') { 
+            steps { 
+                 sh script: 'mvn package'
+
+            } 
+            
+        } 
+        stage('reporting') {
+            steps {
+                archiveArtifacts artifacts: '**/gameoflife.war'
+                junit testResults: '**/targrt/surefire-reports/TEST-*.xml'
+            }
+        }
+
+    }  
+
+}
